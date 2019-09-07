@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" type="text/css" href="assets/css/reset.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/screen.css" />
+    <title>Alien-8</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="256" height="144"> </canvas>
+    <script>
+      let canvas = document.getElementById("canvas");
+      let ctx = canvas.getContext("2d", { alpha: false });
+      let offset = 0;
+      let fpsMax = 1000 / 60;
+      let start = Date.now();
+      let then = Date.now();
+      let frames = 0;
+      let enableFPS = true;
+
+      ctx.font = "16px 'Arial'";
+
+      var imagedata = ctx.createImageData(canvas.width, canvas.height);
+
+      function frame() {
+        requestAnimationFrame(frame);
+
+        let now = Date.now();
+
+        let elapsed = now - then;
+        if (elapsed >= fpsMax) {
+          if (enableFPS) {
+            frames++;
+          }
+
+          for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+              // Get the pixel index
+              var pixelindex = (y * canvas.width + x) * 4;
+
+              // Generate a xor pattern with some random noise
+              var red = (x + offset) % 256 ^ (y + offset) % 256;
+              var green = (2 * x + offset) % 256 ^ (2 * y + offset) % 256;
+              var blue = 0; //50 + Math.floor(Math.random() * 100);
+
+              // Rotate the colors
+              blue = (blue + offset) % 256;
+
+              // Set the pixel data
+              imagedata.data[pixelindex] = red; // Red
+              imagedata.data[pixelindex + 1] = green; // Green
+              imagedata.data[pixelindex + 2] = blue; // Blue
+              imagedata.data[pixelindex + 3] = 255; // Alpha
+            }
+          }
+
+          offset += 1;
+          ctx.putImageData(imagedata, 0, 0);
+          if (enableFPS) {
+            let fps = Math.round(frames / ((now - start) / 1000));
+            ctx.fillText("FPS: " + fps, 5, 20);
+          }
+          then = now - (elapsed % fpsMax);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>
